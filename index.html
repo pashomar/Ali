@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جودی | عارفِ نخودفروش پارک بنفشه</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css2?family=Lalezar&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --neon-green: #39ff14;
+            --deep-purple: #4b0082;
+            --magic-gold: #ffd700;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #050505;
+            color: #fff;
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        h1, h2, h3, .mystic-font {
+            font-family: 'Lalezar', cursive;
+        }
+
+        /* Canvas Background for Smoke */
+        #smokeCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        /* Joudy's Face Styles */
+        .joudy-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+            border-radius: 50%;
+            background: radial-gradient(circle, #2a0a38, #000);
+            box-shadow: 0 0 50px var(--deep-purple);
+            border: 4px solid var(--magic-gold);
+            transition: transform 0.5s;
+        }
+
+        .joudy-container:hover {
+            transform: scale(1.05) rotate(2deg);
+        }
+
+        .third-eye {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 25px;
+            background: #fff;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 0 20px var(--neon-green);
+            animation: blink 4s infinite;
+            z-index: 10;
+        }
+
+        .pupil {
+            width: 15px;
+            height: 15px;
+            background: var(--neon-green);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .mustache {
+            position: absolute;
+            bottom: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 80px;
+            color: #333;
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        .laser-beam {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 5px;
+            background: var(--neon-green);
+            box-shadow: 0 0 20px var(--neon-green), 0 0 40px var(--neon-green);
+            transform-origin: left center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.1s;
+        }
+
+        .laser-active {
+            width: 200vw;
+            opacity: 1;
+        }
+
+        /* Cards */
+        .magic-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(57, 255, 20, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .magic-card:hover {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 30px rgba(57, 255, 20, 0.2);
+            transform: translateY(-5px);
+        }
+
+        /* Animations */
+        @keyframes blink {
+            0%, 90%, 100% { height: 25px; }
+            95% { height: 2px; }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .glow-text {
+            text-shadow: 0 0 10px var(--neon-green);
+        }
+        
+        .purple-glow-text {
+            text-shadow: 0 0 10px var(--deep-purple), 0 0 20px #ff00ff;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+        }
+
+        .modal-content {
+            position: relative;
+            margin: 15% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+            background: linear-gradient(45deg, #1a0524, #0a290a);
+            border: 2px solid var(--neon-green);
+            border-radius: 15px;
+            color: var(--neon-green);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Smoke Background -->
+    <canvas id="smokeCanvas"></canvas>
+
+    <!-- Laser Element -->
+    <div id="laser" class="laser-beam"></div>
+
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 bg-black/50 backdrop-blur-md border-b border-purple-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl mystic-font text-purple-400">جودی <span class="text-green-400">میستیک</span></span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4 space-x-reverse">
+                        <a href="#home" class="text-gray-300 hover:text-green-400 px-3 py-2 rounded-md text-sm font-medium">خانه</a>
+                        <a href="#services" class="text-gray-300 hover:text-green-400 px-3 py-2 rounded-md text-sm font-medium">خدمات ماورایی</a>
+                        <a href="#fortune" class="text-gray-300 hover:text-purple-400 px-3 py-2 rounded-md text-sm font-medium">پیشگویی</a>
+                        <a href="#contact" class="text-gray-300 hover:text-green-400 px-3 py-2 rounded-md text-sm font-medium">ارتباط تله‌پاتیک</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="min-h-screen flex flex-col items-center justify-center pt-20 relative">
+        <div class="text-center z-10 px-4">
+            <div class="joudy-container mb-8 relative" onclick="shootLaser(event)">
+                <div class="third-eye" title="چاکرای ششم فعال است">
+                    <div class="pupil"></div>
+                </div>
+                <!-- Using Icon for Mustache representation inside the circle -->
+                <i class="fa-solid fa-user-secret text-gray-300 text-9xl mt-10 opacity-50"></i>
+                <div class="mustache">
+                    <img src="https://img.icons8.com/ios-filled/100/ffffff/moustache.png" alt="Mustache" style="width: 120px; filter: drop-shadow(0 0 5px #000);">
+                </div>
+            </div>
+            
+            <h1 class="text-6xl md:text-8xl mb-4 purple-glow-text floating">استاد اعظم جودی</h1>
+            <h2 class="text-2xl md:text-3xl text-green-400 mb-8 mystic-font">سلطان نخود، امپراطور دود و چاکرا در فاز ۴</h2>
+            
+            <div class="bg-purple-900/40 p-4 rounded-xl backdrop-blur border border-purple-500 max-w-2xl mx-auto">
+                <p class="text-lg mb-2">📍 لوکیشن: بندر ماهشهر، پارک بنفشه، زیر درخت قدیمی</p>
+                <p class="text-sm text-gray-300">"تنها کسی که می‌تونه همزمان نخود هم بزنه، آینده‌ت رو ببینه و با لیزر سبز سوراخ لایه اوزون رو بدوزه."</p>
+            </div>
+
+            <button onclick="activateChakra()" class="mt-10 bg-transparent border-2 border-green-500 text-green-500 hover:bg-green-500 hover:text-black font-bold py-3 px-8 rounded-full transition duration-300 shadow-[0_0_20px_rgba(57,255,20,0.5)]">
+                <i class="fa-solid fa-eye"></i> فعال‌سازی چشم سوم
+            </button>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-20 px-4 relative">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl text-center mb-16 text-purple-400 glow-text">خدمات ویژه جودی</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Service 1 -->
+                <div class="magic-card p-8 rounded-2xl text-center group">
+                    <div class="text-6xl mb-4 text-yellow-500 group-hover:rotate-12 transition-transform">🥣</div>
+                    <h3 class="text-2xl mb-4 text-white">نخود جادویی</h3>
+                    <p class="text-gray-400 text-sm">
+                        نخود داغ با ادویه مخصوص هندی و گرد جادویی. هر کاسه یه چاکرا رو باز می‌کنه. تضمین نفخ عرفانی!
+                    </p>
+                </div>
+
+                <!-- Service 2 -->
+                <div class="magic-card p-8 rounded-2xl text-center group">
+                    <div class="text-6xl mb-4 text-green-500 group-hover:scale-110 transition-transform">🌿</div>
+                    <h3 class="text-2xl mb-4 text-green-400">بخورات فاز ۴</h3>
+                    <p class="text-gray-400 text-sm">
+                        بهترین گل‌های دست‌چین شده از باغچه پریان. برای مدیتیشن عمیق و پرواز تا کهکشان آندرومدا بدون سفینه.
+                    </p>
+                </div>
+
+                <!-- Service 3 -->
+                <div class="magic-card p-8 rounded-2xl text-center group">
+                    <div class="text-6xl mb-4 text-purple-500 group-hover:animate-pulse">🔮</div>
+                    <h3 class="text-2xl mb-4 text-purple-400">طلسم و جادو</h3>
+                    <p class="text-gray-400 text-sm">
+                        باطل کردن سحر، نوشتن دعای مهر و محبت روی کاغذ سیگار، و ارتباط مستقیم با ارواح سرگردان پارک.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Laser & Mystery Section -->
+    <section class="py-20 bg-gradient-to-b from-black to-purple-900/20 overflow-hidden relative">
+        <div class="max-w-4xl mx-auto text-center px-4">
+            <i class="fa-solid fa-bolt text-green-500 text-6xl mb-6 animate-bounce"></i>
+            <h2 class="text-4xl mb-6 mystic-font text-white">لیزر سبز کیلومتری</h2>
+            <p class="text-xl text-gray-300 mb-8 leading-relaxed">
+                شنیده شده که لیزر جودی تا خود پتروشیمی نور میندازه. شبا که تو پارک بنفشه نوری رو آسمون دیدی، نترس!
+                این جودی داره با فضایی‌ها سیگنال بازی می‌کنه.
+            </p>
+            
+            <div class="relative inline-block group">
+                <button onclick="shootLaserRandom()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-10 rounded shadow-[0_0_50px_#39ff14] transition-all transform group-hover:scale-105">
+                    تست قدرت لیزر
+                </button>
+                <div class="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full animate-ping"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Fortune Teller Section -->
+    <section id="fortune" class="py-20 px-4">
+        <div class="max-w-3xl mx-auto text-center">
+            <div class="mb-8 relative inline-block cursor-pointer" onclick="tellFortune()">
+                <div class="w-48 h-48 rounded-full bg-gradient-to-br from-purple-600 to-blue-900 mx-auto shadow-[0_0_60px_#4b0082] animate-pulse flex items-center justify-center border-4 border-white/10">
+                    <span class="text-6xl">🎱</span>
+                </div>
+                <p class="mt-4 text-gray-400 text-sm">برای گرفتن فال روی گوی کلیک کن</p>
+            </div>
+            
+            <div id="fortune-result" class="min-h-[100px] flex items-center justify-center">
+                <p class="text-2xl text-yellow-400 mystic-font opacity-0 transition-opacity duration-500">هنوز نیت نکردی فرزندم...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-10 bg-black border-t border-green-900">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl mb-8 mystic-font">راه های ارتباطی با جودی</h2>
+            <div class="flex flex-wrap justify-center gap-6">
+                <a href="#" class="flex items-center gap-2 text-gray-400 hover:text-green-400">
+                    <i class="fa-brands fa-whatsapp text-2xl"></i>
+                    <span>واتساپ (فقط پیام صوتی)</span>
+                </a>
+                <a href="#" class="flex items-center gap-2 text-gray-400 hover:text-purple-400">
+                    <i class="fa-solid fa-brain text-2xl"></i>
+                    <span>سیگنال مغزی (فرکانس ۴۲۰ هرتز)</span>
+                </a>
+                <a href="#" class="flex items-center gap-2 text-gray-400 hover:text-yellow-400">
+                    <i class="fa-solid fa-location-dot text-2xl"></i>
+                    <span>بندر ماهشهر، فاز ۴، پارک بنفشه</span>
+                </a>
+            </div>
+            <p class="mt-10 text-gray-600 text-xs">© طراحی شده توسط انرژی‌های کیهانی. هرگونه کپی برداری باعث بسته شدن چاکراها می‌شود.</p>
+        </div>
+    </section>
+
+    <!-- Sound Effect (Hidden) -->
+    <audio id="laserSound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+
+    <!-- Modal for Chakra -->
+    <div id="chakraModal" class="modal">
+        <div class="modal-content shadow-[0_0_50px_var(--neon-green)]">
+            <span class="close absolute top-2 right-4 text-2xl cursor-pointer" onclick="closeModal()">&times;</span>
+            <h2 class="text-3xl mb-4 mystic-font">چشم سوم باز شد!</h2>
+            <p class="text-lg text-white mb-4">حالا می‌تونی رنگ واقعی آدم‌ها رو ببینی...</p>
+            <div class="text-6xl animate-spin inline-block">🌀</div>
+            <p class="mt-4 text-xs text-gray-400">هشدار: مصرف زیاد نخود ممکن است دید را تار کند.</p>
+        </div>
+    </div>
+
+    <script>
+        // --- Smoke Animation Setup ---
+        const canvas = document.getElementById('smokeCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + Math.random() * 100;
+                this.vx = Math.random() * 1 - 0.5;
+                this.vy = Math.random() * -1.5 - 0.5;
+                this.size = Math.random() * 20 + 10;
+                // Green and Purple smoke colors
+                this.color = Math.random() > 0.5 
+                    ? `rgba(75, 0, 130, ${Math.random() * 0.5})` // Purple
+                    : `rgba(57, 255, 20, ${Math.random() * 0.3})`; // Green
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.size += 0.1;
+                this.color = this.color.replace(/, [0-9.]+\)/, `, ${parseFloat(this.color.split(',')[3]) - 0.002})`);
+                
+                if (parseFloat(this.color.split(',')[3]) <= 0) {
+                    this.reset();
+                }
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + 50;
+                this.size = Math.random() * 20 + 10;
+                this.color = Math.random() > 0.5 
+                    ? `rgba(75, 0, 130, ${Math.random() * 0.5})`
+                    : `rgba(57, 255, 20, ${Math.random() * 0.3})`;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 50; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateSmoke() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateSmoke);
+        }
+        animateSmoke();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // --- Laser Logic ---
+        function shootLaserRandom() {
+            shootLaser({ clientX: Math.random() * window.innerWidth, clientY: Math.random() * window.innerHeight });
+        }
+
+        function shootLaser(e) {
+            const laser = document.getElementById('laser');
+            const sound = document.getElementById('laserSound');
+            
+            // Random rotation for chaos
+            const angle = Math.random() * 360;
+            
+            // Positioning laser start (roughly from the eye if clicked on eye, or center screen otherwise)
+            // For simplicity in this effect, we shoot from center screen out
+            laser.style.top = '50%';
+            laser.style.left = '50%';
+            laser.style.transform = `translateY(-50%) rotate(${angle}deg)`;
+            
+            laser.classList.add('laser-active');
+            
+            // Play sound (needs interaction first usually)
+            sound.volume = 0.2;
+            sound.currentTime = 0;
+            sound.play().catch(e => console.log("Audio play failed needed interaction"));
+
+            setTimeout(() => {
+                laser.classList.remove('laser-active');
+            }, 200);
+        }
+
+        // --- Fortune Logic ---
+        const fortunes = [
+            "فردا یک مشتری سیبیلو برات میاد که پول خوبی میده.",
+            "چاکراهای شکمت بسته‌ست، کمتر نخود بخور.",
+            "تو پارک بنفشه یه گنج پیدا می‌کنی (شایدم پوست چیپس باشه).",
+            "ستاره‌ها میگن لیزر سبز راه خوشبختی رو نشونت میده.",
+            "مواظب باش! پلیس فتا حواسش بهت هست.",
+            "هفته دیگه جنس ناب به دستت میرسه.",
+            "یه روح سرگردان عاشق سیبیلت شده."
+        ];
+
+        function tellFortune() {
+            const resultDiv = document.querySelector('#fortune-result p');
+            resultDiv.style.opacity = 0;
+            
+            setTimeout(() => {
+                const randomFortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+                resultDiv.textContent = randomFortune;
+                resultDiv.style.opacity = 1;
+            }, 300);
+        }
+
+        // --- Modal Logic ---
+        function activateChakra() {
+            document.getElementById('chakraModal').style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Disable scroll
+        }
+
+        function closeModal() {
+            document.getElementById('chakraModal').style.display = 'none';
+            document.body.style.overflow = 'auto'; // Enable scroll
+        }
+
+        // Close modal if clicked outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('chakraModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
+
